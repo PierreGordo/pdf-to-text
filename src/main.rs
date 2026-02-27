@@ -1,12 +1,15 @@
 use std::env;
+use std::path::PathBuf;
 
 //This function gather the command line arguments and parses out the path of the .pdf file
-fn gather_arguments() -> Result<String, &'static str> {
+fn gather_arguments() -> Result<PathBuf, &'static str> {
+
+
     let args: Vec<String> = env::args().collect();
 
     //first argument is the path to the executable
     //second argument should be -T for target
-    //thirt argument will be the .pdf (either the whole path or just the filename in which case I can obtain the filepath by combining it with the path to the executable)
+    //thirt argument will be the .pdf - just the filename, but the path is also fine, since I added
     match args.len() {
         3 => {
             //If there is a correct amount of arguments, check whether the -T argument is correct
@@ -16,19 +19,13 @@ fn gather_arguments() -> Result<String, &'static str> {
                     //This here hopes that the .pdf will be in the same directory as the .pdf and will have to be fixed in the future
                     //Ok(args[0].clone())
 
-                    let filename = args[2].clone();
-                    let path = args[0].clone();
+                    
+                    let path = PathBuf::from(&args[2]);
+                    //let filename = args[2].clone();
 
-                    match path.rsplit_once("/") {
-                        Some(split_path) => {
-                            //Now that we have the path split, we just append the name provided to us which will create a potential path - if it is wrong, it is user error
-                            let mut path_to_file = String::from(split_path.0);
-                            path_to_file.push('/');
-                            path_to_file.push_str(filename.as_str());
-                            Ok(path_to_file)
-                        }
-                        None => Err("Failed to parse the filepath"),
-                    }
+                    //path.push(&args[2]);
+                    Ok(path)
+
                 }
                 _ => {
                     println!("An invalid argument {} was provided.", args[1]);
@@ -47,8 +44,9 @@ fn gather_arguments() -> Result<String, &'static str> {
 }
 
 fn main() {
-    match gather_arguments() {
-        Ok(path) => println!("The filename is {path}"),
-        Err(_) => return,
-    }
+
+	//Extracting the path from the function - gather_arguments()
+	let path = gather_arguments().unwrap();
+
+    println!("The filename is {:?}", path);
 }
